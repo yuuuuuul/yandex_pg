@@ -128,9 +128,8 @@ class Door(pygame.sprite.Sprite):
                 else:
                     print('not')
                     self.m_max('-')
-                    for i in door_group:
-                        if i not in got_group:
-                            i.image = pygame.transform.scale(load_image('door.png'), (150, 100))
+                    i = now_opened[0]
+                    i.image  = pygame.transform.scale(load_image('door.png'), (150, 100))
                 print(got_group)
                 set_of_coords.clear()
                 now_opened.clear()
