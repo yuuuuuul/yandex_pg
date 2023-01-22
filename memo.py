@@ -8,41 +8,71 @@ pygame.init()
 size = WIDTH, HEIGHT = 750, 750
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
-FPS = 50
+fps = 50
 stars_group = pygame.sprite.Group()
 door_group = pygame.sprite.Group()
 got_group = pygame.sprite.Group()
 not_got_group = pygame.sprite.Group()
 now_opened = set()
 now_opened_coords = set()
-d1 = ['пин', 'тигр', 'тигр', 'копатыч']
-d2 = ['ежик', 'карыч', 'лосяш', 'крош']
-d3 = ['нюша', 'совунья', 'пин', 'копатыч']
-d4 = ['бараш', 'карыч', 'крош', 'нюша']
-d5 = ['совунья', 'лосяш', 'ежик', 'бараш']
-""""
+d1 = ['kaif', 'find', 'find', 'lang']
+d2 = ['ly', 'shit', 'ebu', 'sun']
+d3 = ['nice', 'selfi', 'kaif', 'lang']
+d4 = ['glasses', 'shit', 'sun', 'nice']
+d5 = ['selfi', 'ebu', 'ly', 'glasses']
+
 random.shuffle(d1)
 random.shuffle(d2)
 random.shuffle(d3)
 random.shuffle(d4)
 random.shuffle(d5)
-"""
+
 desk = [d1, d2, d3, d4, d5]
 set_of_coords = set()
 set_now_opened = []
 set_check = set()
-keys = {'пин':'pin.png',
-        'тигр':'tig.png',
-        'копатыч':'kop.png',
-        'ежик':'ezhik.png',
-        'нюша':'nusha.png',
-        'совунья':'sov.png',
-        'крош':'krosh.png',
-        'лосяш':'los.png',
-        'бараш':'barash.png',
-        'карыч':'kar.png'}
+keys = {'eby':'ebu.jpg',
+        'selfi':'selfi.jpg',
+        'glasses':'glasses.jpg',
+        'sun':'sun.jpg',
+        'shit':'shit.jpg',
+        'ly':'ly.jpg',
+        'nice':'nice.jpg',
+        'kaif':'kaif.jpg',
+        'find':'find.jpg',
+        'lang':'lang.jpg'}
 
 
+def start_screen():
+    intro_text = ["Правила игры:",
+                  "Вам нужно собрать все пары.",
+                  "При открытии новой картинки старая закрывается",
+                  "Для того, чтобы начать, нажмите любую кнопку.",
+                  "Кликайте на дверь мышкой, чтобы открыть её",
+                  "Удачи!"]
+
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('red'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(fps)
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -189,6 +219,7 @@ class Door(pygame.sprite.Sprite):
 
 
 def main():
+    start_screen()
     pygame.init()
     running = True
     board = Board()
@@ -198,15 +229,16 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            door_group.update(event)
         board.render(screen)
         screen.fill((255, 255, 255))
         door_group.draw(screen)
         got_group.draw(screen)
         #stars_group.draw(screen)
-        door_group.update(event)
+
         #create_particles((300, 300))
         stars_group.update()
-        clock.tick(FPS)
+        clock.tick(fps)
         pygame.display.flip()
 
 if __name__ == "__main__":
