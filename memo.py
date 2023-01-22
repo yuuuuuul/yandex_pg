@@ -1,5 +1,5 @@
 import pygame
-import copy
+import random
 import sys
 import os
 
@@ -8,16 +8,26 @@ pygame.init()
 size = WIDTH, HEIGHT = 750, 750
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
+FPS = 50
+stars_group = pygame.sprite.Group()
 door_group = pygame.sprite.Group()
 got_group = pygame.sprite.Group()
 not_got_group = pygame.sprite.Group()
-now_opened = []
-fps = 7
-desk = [['пин', 'тигр', 'тигр', 'копатыч'],
-      ['ежик', 'карыч', 'лосяш', 'крош'],
-      ['нюша', 'совунья', 'пин', 'копатыч'],
-      ['бараш', 'карыч', 'крош', 'нюша'],
-      ['совунья', 'лосяш', 'ежик', 'бараш']]
+now_opened = set()
+now_opened_coords = set()
+d1 = ['пин', 'тигр', 'тигр', 'копатыч']
+d2 = ['ежик', 'карыч', 'лосяш', 'крош']
+d3 = ['нюша', 'совунья', 'пин', 'копатыч']
+d4 = ['бараш', 'карыч', 'крош', 'нюша']
+d5 = ['совунья', 'лосяш', 'ежик', 'бараш']
+""""
+random.shuffle(d1)
+random.shuffle(d2)
+random.shuffle(d3)
+random.shuffle(d4)
+random.shuffle(d5)
+"""
+desk = [d1, d2, d3, d4, d5]
 set_of_coords = set()
 set_now_opened = []
 set_check = set()
@@ -31,6 +41,9 @@ keys = {'пин':'pin.png',
         'лосяш':'los.png',
         'бараш':'barash.png',
         'карыч':'kar.png'}
+
+
+
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     # если файл не существует, то выходим
@@ -50,6 +63,46 @@ def load_image(name, colorkey=None):
 
 def maximize(x):
     return x + 30
+
+class Particle(pygame.sprite.Sprite):
+    # сгенерируем частицы разного размера
+    fire = [load_image("star.png")]
+    for scale in (5, 10, 20):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(stars_group)
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+
+
+        # у каждой частицы своя скорость — это вектор
+        self.velocity = [dx, dy]
+        # и свои координаты
+        self.rect.x, self.rect.y = pos
+        GRAVITY = 0
+        # гравитация будет одинаковой (значение константы)
+        self.gravity = GRAVITY
+
+    def update(self):
+        # применяем гравитационный эффект:
+        # движение с ускорением под действием гравитации
+        self.velocity[1] += self.gravity
+        # перемещаем частицу
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        # убиваем, если частица ушла за экран
+        if not self.rect.colliderect(0, 0, 750, 750):
+            self.kill()
+
+def create_particles(position):
+    # количество создаваемых частиц
+    particle_count = 20
+    # возможные скорости
+    numbers = range(-5, 6)
+    for _ in range(particle_count):
+        Particle(position, random.choice(numbers), random.choice(numbers))
+
 class Board:
     def __init__(self):
         self.width = 4
@@ -106,46 +159,31 @@ class Door(pygame.sprite.Sprite):
         j = 0
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
-            print(set_of_coords, 'before')
             #pygame.time.delay(1000)
             x, y = args[0].pos
             x_m = (x - 40) // 150
             y_m = (y - 10) // 150
-            print(set_of_coords, 'middle')
             self.image = pygame.transform.scale(load_image(keys[desk[y_m][x_m]]), (150, 100))
-            if self.m == 0:
-                now_opened.append(self)
-                set_of_coords.add((y_m, x_m))
-            print(set_of_coords, 'main')
-            if len(set_of_coords) == 2:
-                list_of_coords = list(set_of_coords)
-                if keys[desk[list_of_coords[0][0]][list_of_coords[0][1]]] == keys[desk[list_of_coords[1][0]][list_of_coords[1][1]]]:
-                    print('yes')
-                    for i in set(now_opened):
-                        got_group.add(i)
-                    self.m_max('+')
-
+            if len(now_opened) == 0:
+                now_opened.add(self)
+                now_opened_coords.add((y_m, x_m))
+            if len(now_opened) != 0:
+                noc2 = tuple(now_opened_coords)
+                no2 = tuple(now_opened)
+                if keys[desk[y_m][x_m]] == keys[desk[noc2[0][0]][noc2[0][1]]] and (y_m, x_m) != (noc2[0][0], noc2[0][1]):
+                    got_group.add(no2[0])
+                    got_group.add(self)
+                    got_group.add(no2[0])
+                    got_group.add(self)
                 else:
-                    print('not')
-                    self.m_max('-')
-                    i = now_opened[0]
-                    i.image  = pygame.transform.scale(load_image('door.png'), (150, 100))
-                print(got_group)
-                set_of_coords.clear()
-                now_opened.clear()
+                    now_opened.clear()
+                    now_opened_coords.clear()
+                    now_opened.add(self)
 
-
-
-
-
-
-
-
-
-
-
-
-
+                    now_opened_coords.add((y_m, x_m))
+            for i in door_group:
+                if i not in got_group and i != self:
+                    i.image = pygame.transform.scale(load_image("door.png"), (150, 100))
 
 
 
@@ -153,7 +191,6 @@ class Door(pygame.sprite.Sprite):
 def main():
     pygame.init()
     running = True
-
     board = Board()
     for i in range(20):
         Door(door_group)
@@ -165,9 +202,15 @@ def main():
         screen.fill((255, 255, 255))
         door_group.draw(screen)
         got_group.draw(screen)
+        #stars_group.draw(screen)
         door_group.update(event)
+        #create_particles((300, 300))
+        stars_group.update()
+        clock.tick(FPS)
         pygame.display.flip()
-        #clock.tick(fps)
 
 if __name__ == "__main__":
     main()
+    stars_group.draw(screen)
+    create_particles((300, 300))
+    stars_group.update()

@@ -36,7 +36,8 @@ def start_screen():
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                terminate()
+                pygame.quit()
+                sys.exit()
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
                 return  # начинаем игру
@@ -85,8 +86,6 @@ class Board:
         self.left = self.top = 0
         self.height = 30
         self.cell_size = 25
-        global board
-        board = load_level("data/level_one")
         self.board = load_level("data/level_one")
         self.board2 = load_level("data/level_one")
 
@@ -122,44 +121,112 @@ class Life(Board):
         cnt = 0
         for i in range(self.height):
             for j in range(self.width):
-                a = True
-                #ВЕРХНЯЯ ЛЕВАЯ КЛЕТКА
-                if i == 0: #or i == self.height - 1:
-                    if j == 0:# or j == self.width - 1:
-                        if self.board[i][j + 1] == 1:
+                if self.board[i][j] == 3:
+                    self.board2[i][j] = 3
+                else:
+                    a = True
+                    #ВЕРХНЯЯ ЛЕВАЯ КЛЕТКА
+                    if i == 0: #or i == self.height - 1:
+                        if j == 0:# or j == self.width - 1:
+                            if self.board[i][j + 1] == 1:
+                                cnt += 1
+                            if self.board[i + 1][j] == 1:
+                                cnt += 1
+                            if self.board[i + 1][j + 1] == 1:
+                                cnt += 1
+                            if cnt == 3 and self.board[i][j] == 0:
+                                self.board2[i][j] = 1
+                            if cnt < 2:
+                                self.board2[i][j] = 0
+                            a = False
+                        #ВЕРХНЯЯ ПРАВАЯ
+                        elif j == self.width - 1 and a:
+                            if self.board[i][j - 1] == 1:
+                                cnt += 1
+                            if self.board[i + 1][j] == 1:
+                                cnt += 1
+                            if self.board[i + 1][j - 1] == 1:
+                                cnt += 1
+                            if cnt == 3 and self.board[i][j] == 0:
+                                self.board2[i][j] = 1
+                            if cnt < 2:
+                                self.board2[i][j] = 0
+                            a = False
+                        elif i == 0:
+                            if self.board[i][j - 1] == 1:
+                                cnt += 1
+                            if self.board[i][j + 1] == 1:
+                                cnt += 1
+                            if self.board[i + 1][j - 1] == 1:
+                                cnt += 1
+                            if self.board[i + 1][j + 1] == 1:
+                                cnt += 1
+                            if self.board[i + 1][j] == 1:
+                                cnt += 1
+                            if (cnt == 3 or cnt == 2) and self.board[i][j] == 1:
+                                self.board2[i][j] = 1
+                            elif self.board[i][j] == 0 and cnt == 3:
+                                self.board2[i][j] = 1
+                            else:
+                                self.board2[i][j] = 0
+                            a = False
+                    #НИЖНЯЯ
+                    elif i == self.height - 1 and a:
+                        if j == 0:
+                            #ЛЕВАЯ
+                            if self.board[i - 1][j] == 1:
+                                cnt += 1
+                            if self.board[i - 1][j + 1] == 1:
+                                cnt += 1
+                            if self.board[i][j + 1] == 1:
+                                cnt += 1
+                            if cnt == 3 and self.board[i][j] == 0:
+                                self.board2[i][j] = 1
+
+                            if cnt < 2:
+                                self.board2[i][j] = 0
+                            a = False
+                        #ПРАВАЯ
+                        if j == self.width - 1 and a:
+                            if self.board[i - 1][j] == 1:
+                                cnt += 1
+                            if self.board[i][j - 1] == 1:
+                                cnt += 1
+                            if self.board[i - 1][j - 1] == 1:
+                                cnt += 1
+                            if cnt == 3 and self.board[i][j] == 0:
+                                self.board2[i][j] = 1
+                            if cnt < 2:
+                                self.board2[i][j] = 0
+                            a = False
+                        elif i == self.height - 1:
+                            if self.board[i][j - 1] == 1:
+                                cnt += 1
+                            if self.board[i][j + 1] == 1:
+                                cnt += 1
+                            if self.board[i - 1][j - 1] == 1:
+                                cnt += 1
+                            if self.board[i - 1][j + 1] == 1:
+                                cnt += 1
+                            if self.board[i - 1][j] == 1:
+                                cnt += 1
+                            if (cnt == 3 or cnt == 2) and self.board[i][j] == 1:
+                                self.board2[i][j] = 1
+                            elif self.board[i][j] == 0 and cnt == 3:
+                                self.board2[i][j] = 1
+                            else:
+                                self.board2[i][j] = 0
+                            a = False
+                    elif j == 0 and a:
+                        if self.board[i - 1][j] == 1:
                             cnt += 1
                         if self.board[i + 1][j] == 1:
+                            cnt += 1
+                        if self.board[i - 1][j + 1] == 1:
                             cnt += 1
                         if self.board[i + 1][j + 1] == 1:
                             cnt += 1
-                        if cnt == 3 and self.board[i][j] == 0:
-                            self.board2[i][j] = 1
-                        if cnt < 2:
-                            self.board2[i][j] = 0
-                        a = False
-                    #ВЕРХНЯЯ ПРАВАЯ
-                    elif j == self.width - 1 and a:
-                        if self.board[i][j - 1] == 1:
-                            cnt += 1
-                        if self.board[i + 1][j] == 1:
-                            cnt += 1
-                        if self.board[i + 1][j - 1] == 1:
-                            cnt += 1
-                        if cnt == 3 and self.board[i][j] == 0:
-                            self.board2[i][j] = 1
-                        if cnt < 2:
-                            self.board2[i][j] = 0
-                        a = False
-                    elif i == 0:
-                        if self.board[i][j - 1] == 1:
-                            cnt += 1
                         if self.board[i][j + 1] == 1:
-                            cnt += 1
-                        if self.board[i + 1][j - 1] == 1:
-                            cnt += 1
-                        if self.board[i + 1][j + 1] == 1:
-                            cnt += 1
-                        if self.board[i + 1][j] == 1:
                             cnt += 1
                         if (cnt == 3 or cnt == 2) and self.board[i][j] == 1:
                             self.board2[i][j] = 1
@@ -168,36 +235,25 @@ class Life(Board):
                         else:
                             self.board2[i][j] = 0
                         a = False
-                #НИЖНЯЯ
-                elif i == self.height - 1 and a:
-                    if j == 0:
-                        #ЛЕВАЯ
-                        if self.board[i - 1][j] == 1:
-                            cnt += 1
-                        if self.board[i - 1][j + 1] == 1:
-                            cnt += 1
-                        if self.board[i][j + 1] == 1:
-                            cnt += 1
-                        if cnt == 3 and self.board[i][j] == 0:
-                            self.board2[i][j] = 1
-
-                        if cnt < 2:
-                            self.board2[i][j] = 0
-                        a = False
-                    #ПРАВАЯ
                     if j == self.width - 1 and a:
                         if self.board[i - 1][j] == 1:
                             cnt += 1
-                        if self.board[i][j - 1] == 1:
+                        if self.board[i + 1][j] == 1:
                             cnt += 1
                         if self.board[i - 1][j - 1] == 1:
                             cnt += 1
-                        if cnt == 3 and self.board[i][j] == 0:
+                        if self.board[i + 1][j - 1] == 1:
+                            cnt += 1
+                        if self.board[i][j - 1] == 1:
+                            cnt += 1
+                        if (cnt == 3 or cnt == 2) and self.board[i][j] == 1:
                             self.board2[i][j] = 1
-                        if cnt < 2:
+                        elif self.board[i][j] == 0 and cnt == 3:
+                            self.board2[i][j] = 1
+                        else:
                             self.board2[i][j] = 0
                         a = False
-                    elif i == self.height - 1:
+                    elif a:
                         if self.board[i][j - 1] == 1:
                             cnt += 1
                         if self.board[i][j + 1] == 1:
@@ -208,6 +264,12 @@ class Life(Board):
                             cnt += 1
                         if self.board[i - 1][j] == 1:
                             cnt += 1
+                        if self.board[i + 1][j - 1] == 1:
+                            cnt += 1
+                        if self.board[i + 1][j + 1] == 1:
+                            cnt += 1
+                        if self.board[i + 1][j] == 1:
+                            cnt += 1
                         if (cnt == 3 or cnt == 2) and self.board[i][j] == 1:
                             self.board2[i][j] = 1
                         elif self.board[i][j] == 0 and cnt == 3:
@@ -215,69 +277,8 @@ class Life(Board):
                         else:
                             self.board2[i][j] = 0
                         a = False
-                elif j == 0 and a:
-                    if self.board[i - 1][j] == 1:
-                        cnt += 1
-                    if self.board[i + 1][j] == 1:
-                        cnt += 1
-                    if self.board[i - 1][j + 1] == 1:
-                        cnt += 1
-                    if self.board[i + 1][j + 1] == 1:
-                        cnt += 1
-                    if self.board[i][j + 1] == 1:
-                        cnt += 1
-                    if (cnt == 3 or cnt == 2) and self.board[i][j] == 1:
-                        self.board2[i][j] = 1
-                    elif self.board[i][j] == 0 and cnt == 3:
-                        self.board2[i][j] = 1
-                    else:
-                        self.board2[i][j] = 0
-                    a = False
-                if j == self.width - 1 and a:
-                    if self.board[i - 1][j] == 1:
-                        cnt += 1
-                    if self.board[i + 1][j] == 1:
-                        cnt += 1
-                    if self.board[i - 1][j - 1] == 1:
-                        cnt += 1
-                    if self.board[i + 1][j - 1] == 1:
-                        cnt += 1
-                    if self.board[i][j - 1] == 1:
-                        cnt += 1
-                    if (cnt == 3 or cnt == 2) and self.board[i][j] == 1:
-                        self.board2[i][j] = 1
-                    elif self.board[i][j] == 0 and cnt == 3:
-                        self.board2[i][j] = 1
-                    else:
-                        self.board2[i][j] = 0
-                    a = False
-                elif a:
-                    if self.board[i][j - 1] == 1:
-                        cnt += 1
-                    if self.board[i][j + 1] == 1:
-                        cnt += 1
-                    if self.board[i - 1][j - 1] == 1:
-                        cnt += 1
-                    if self.board[i - 1][j + 1] == 1:
-                        cnt += 1
-                    if self.board[i - 1][j] == 1:
-                        cnt += 1
-                    if self.board[i + 1][j - 1] == 1:
-                        cnt += 1
-                    if self.board[i + 1][j + 1] == 1:
-                        cnt += 1
-                    if self.board[i + 1][j] == 1:
-                        cnt += 1
-                    if (cnt == 3 or cnt == 2) and self.board[i][j] == 1:
-                        self.board2[i][j] = 1
-                    elif self.board[i][j] == 0 and cnt == 3:
-                        self.board2[i][j] = 1
-                    else:
-                        self.board2[i][j] = 0
-                    a = False
-                cnt = 0
-                self.board2[-1][-1] = 2
-        board = copy.deepcopy(self.board2)
+                    cnt = 0
+                    self.board2[-1][-1] = 2
 
 
     def render(self):
@@ -291,6 +292,9 @@ class Life(Board):
                     if self.board2[i][j] == 1:
                         pygame.draw.rect(screen, (0, 255, 0), (self.left + j * self.cell_size, self.top + i * self.cell_size, self.cell_size,
                                           self.cell_size), 0)
+                    elif self.board2[i][j] == 3:
+                        pygame.draw.rect(screen, (252, 199, 0), (self.left + j * self.cell_size, self.top + i * self.cell_size, self.cell_size,
+                                          self.cell_size), 0)
                     else:
                         pygame.draw.rect(screen, (255, 255, 255),
                                          (self.left + j * self.cell_size, self.top + i * self.cell_size, self.cell_size,
@@ -299,12 +303,27 @@ class Life(Board):
                                      (self.left + j * self.cell_size, self.top + i * self.cell_size, self.cell_size,
                                       self.cell_size), 1)
         self.board = copy.deepcopy(self.board2)
-        print(self.board2 == board)
+        board = copy.deepcopy(self.board2)
+
+        """
+        with open('data/level_one.txt', 'w') as f:
+            for i in self.board:
+                f.write(' '.join(str(i)))
+                f.write('\n')
+        """
+
 
     def on_click(self, cell):
         super().on_click(cell)
         self.board2 = self.board
 
+    def check(self, x, y):
+        if self.board2[x][y] == 1 or self.board2[x][y] == 3:
+            Hero.pause(hero, ["Упс! Попробуйте еще!", "Enter - выход", "A - начать заново"], 100, 100)
+        elif x == 29 and y == 29:
+            Hero.pause(hero, ["Победа!", "Нажмите Enter для продолжения"], 100, 100)
+
+b = Life(30, 30)
 cell_size = 25
 hero_image = load_image("creature.png")
 
@@ -335,24 +354,28 @@ class Hero(pygame.sprite.Sprite, Life):
                     sys.exit()
                 elif key[pygame.K_a]:
                     a = False
-                    self.kill()
-                    main()
+                    hero_group.remove(self)
+                    for i in hero_group:
+                        i.kill()
+                    b2 = Life(20, 20)
+                    hero2 = Hero()
+                    main(b2, hero2)
+
             pygame.display.update()
 
     def check(self):
-        if board[self.rect.y // cell_size][self.rect.x // cell_size] == 1:
-            for i in board:
-                print(i)
-            print()
-            self.pause(["Упс! Попробуйте еще!", "Enter - выход", "A - начать заново"], 100, 100)
-        elif self.rect.x // cell_size == 29 and self.rect.y // cell_size == 29:
-            self.pause(["Победа!", "Нажмите Enter для продолжения"], 100, 100)
+        Life.check(b, self.rect.y // cell_size, self.rect.x // cell_size)
 
-def main():
+hero = Hero()
+
+def init():
     b = Life(30, 30)
+    hero = Hero()
+def main(b, hero):
+    if a is False:
+        init()
     pygame.Surface(size)
     running = True
-    hero = Hero()
     flag = False
     while running:
         screen.fill((255, 255, 255))
@@ -380,4 +403,4 @@ def main():
 if __name__ == "__main__":
     if a:
         start_screen()
-    main()
+    main(b, hero)
