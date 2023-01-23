@@ -30,7 +30,7 @@ def generate(scheme, x, y, size_f):
 
 def mix(scheme):
     i = 0
-    while i != 10:
+    while i != 5:
         moves = []
         if 0 not in scheme[2]:
             moves.append('down')
