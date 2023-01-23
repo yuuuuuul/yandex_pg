@@ -1,21 +1,20 @@
 import random
 import pygame
+from memo import start_memo
 import sys
 import os
+from pygame import mixer
 
-
-pygame.init()
-size = width, height = 500, 500
+size = width, height = 750, 750
 screen = pygame.display.set_mode(size)
-clock = pygame.time.Clock()
-FPS = 50
-DEFAULT_IMAGE_SIZE = (50, 50)
 scheme = [[1, 2, 3],
           [4, 5, 6],
           [7, 8, 0]]
-size_f = 60
+size_f = 90
 x = width // 2 - size_f * 1.5 - 5
 y = height // 2 - size_f * 1.5 - 5
+clock = pygame.time.Clock()
+FPS = 50
 
 
 def generate(scheme, x, y, size_f):
@@ -31,7 +30,7 @@ def generate(scheme, x, y, size_f):
 
 def mix(scheme):
     i = 0
-    while i != 50:
+    while i != 10:
         moves = []
         if 0 not in scheme[2]:
             moves.append('down')
@@ -78,7 +77,7 @@ def mix(scheme):
     return scheme
 
 
-def load_image(name, img_size, colorkey=None):
+def load_image_w_size(name, img_size, colorkey=None):
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -102,46 +101,17 @@ def terminate():
 
 
 tile_images = {
-    '1': load_image('1.jpg', (60, 60)),
-    '2': load_image('2.jpg', (60, 60)),
-    '3': load_image('3.jpg', (60, 60)),
-    '4': load_image('4.jpg', (60, 60)),
-    '5': load_image('5.jpg', (60, 60)),
-    '6': load_image('6.jpg', (60, 60)),
-    '7': load_image('7.jpg', (60, 60)),
-    '8': load_image('8.jpg', (60, 60)),
-    '0': load_image('0.jpg', (60, 60))
+    '1': load_image_w_size('1.jpg', (90, 90)),
+    '2': load_image_w_size('2.jpg', (90, 90)),
+    '3': load_image_w_size('3.jpg', (90, 90)),
+    '4': load_image_w_size('4.jpg', (90, 90)),
+    '5': load_image_w_size('5.jpg', (90, 90)),
+    '6': load_image_w_size('6.jpg', (90, 90)),
+    '7': load_image_w_size('7.jpg', (90, 90)),
+    '8': load_image_w_size('8.jpg', (90, 90)),
+    '0': load_image_w_size('0.jpg', (90, 90))
 }
-tile_width = tile_height = 50
-
-
-def print_text(text):
-    font = pygame.font.Font(None, 30)
-    text_coord = 80
-    for line in text:
-        string_rendered = font.render(line, 1, pygame.Color('brown'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.right = 100
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-
-
-def start_screen():
-    fon = pygame.transform.scale(load_image('rules.jpg', (500, 500)), (500, 500))
-    screen.blit(fon, (0, 0))
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return  # начинаем игру
-        pygame.display.flip()
-        clock.tick(FPS)
-
+tile_width = tile_height = 90
 
 def move(scheme, pos, x, y, size_f):
     x_sch = -1
@@ -193,24 +163,24 @@ def move(scheme, pos, x, y, size_f):
     return scheme
 
 
-if __name__ == '__main__':
+def start_pyatnashki(scheme):
     picked = False
-    fon1 = pygame.transform.scale(load_image('fon_pt.jpg', (500, 500)), (500, 500))
-    start_screen()
-    print_text('Восьмнашки')
+    fon1 = pygame.transform.scale(load_image_w_size('fon_for_games.jpg', (750, 750)), (750, 750))
     running = True
     bt_x = width // 2 - 52.5
     bt_y = 80
-    button = load_image('button_mix.bmp', None)
+    button = load_image_w_size('button_mix.bmp', None)
     is_on = False
     over = False
+    pygame.mixer.init(44100, -16, 2, 2048)
     bow = pygame.mixer.Sound("data/bow.mp3")
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                pass
+                if event.key == 32:  # ПРОБЕЛ
+                    start_memo()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if bt_x <= event.pos[0] <= bt_x + 100 and bt_y <= event.pos[1] <= bt_y + 37:
                     scheme = mix(scheme)
@@ -219,18 +189,19 @@ if __name__ == '__main__':
                     if is_on:
                         scheme = move(scheme, event.pos, x, y, size_f)
                         generate(scheme, x, y, size_f)
-        fon1 = pygame.transform.scale(load_image('fon_pt.jpg', (500, 500)), (500, 500))
+        fon1 = pygame.transform.scale(load_image_w_size('fon_for_games.jpg', (750, 700)), (750, 750))
         screen.blit(fon1, (0, 0))
         if not over:
             if is_on and scheme == [[1, 2, 3], [4, 5, 6], [7, 8, 0]]:
-                screen.blit(load_image('doge.jpg', (190, 190)), (x, y))
+                screen.blit(load_image_w_size('doge.jpg', (280, 280)), (x, y))
                 bow.play(loops=0)
                 over = True
         if not over:
             generate(scheme, x, y, size_f)
-        if over:
-            screen.blit(load_image('doge.jpg', (190, 190)), (x, y))
         screen.blit(button, (bt_x, bt_y))
         pygame.display.flip()
     clock.tick(FPS)
     terminate()
+
+if __name__ == '__main__':
+    start_pyatnashki(scheme)

@@ -2,17 +2,14 @@ import pygame
 import random
 import sys
 import os
+from life import start_life, hero, b
 
 
 pygame.init()
 size = WIDTH, HEIGHT = 750, 750
 screen = pygame.display.set_mode(size)
-clock = pygame.time.Clock()
-fps = 50
-stars_group = pygame.sprite.Group()
 door_group = pygame.sprite.Group()
 got_group = pygame.sprite.Group()
-not_got_group = pygame.sprite.Group()
 now_opened = set()
 now_opened_coords = set()
 d1 = ['kaif', 'find', 'find', 'lang']
@@ -31,7 +28,9 @@ desk = [d1, d2, d3, d4, d5]
 set_of_coords = set()
 set_now_opened = []
 set_check = set()
-keys = {'eby':'ebu.jpg',
+clock = pygame.time.Clock()
+fps = 7
+keys = {'ebu':'ebu.jpg',
         'selfi':'selfi.jpg',
         'glasses':'glasses.jpg',
         'sun':'sun.jpg',
@@ -42,6 +41,19 @@ keys = {'eby':'ebu.jpg',
         'find':'find.jpg',
         'lang':'lang.jpg'}
 
+def photo_screen(picture):
+    fon = pygame.transform.scale(load_image(picture), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(fps)
 
 def start_screen():
     intro_text = ["Правила игры:",
@@ -51,12 +63,12 @@ def start_screen():
                   "Кликайте на дверь мышкой, чтобы открыть её",
                   "Удачи!"]
 
-    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    fon = pygame.transform.scale(load_image('fon_for_games.jpg'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
     text_coord = 50
     for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('red'))
+        string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
@@ -72,8 +84,19 @@ def start_screen():
                     event.type == pygame.MOUSEBUTTONDOWN:
                 return  # начинаем игру
         pygame.display.flip()
-        clock.tick(fps)
+        #clock.tick(fps)
 
+def print_text(message, font_color=(255, 0, 0), font_type="data/pobeda-bold1.ttf", font_size = 90):
+    font_type = pygame.font.Font(font_type, font_size)
+    text_coord = 50
+    for text in message:
+        string = font_type.render(text, True, font_color)
+        intro_rect = string.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 20
+        text_coord += intro_rect.height
+        screen.blit(string, intro_rect)
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     # если файл не существует, то выходим
@@ -82,58 +105,8 @@ def load_image(name, colorkey=None):
         sys.exit()
     image = pygame.image.load(fullname)
     return image
-    if colorkey is not None:
-        image = image.convert()
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
-    return image
 
-def maximize(x):
-    return x + 30
-
-class Particle(pygame.sprite.Sprite):
-    # сгенерируем частицы разного размера
-    fire = [load_image("star.png")]
-    for scale in (5, 10, 20):
-        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
-
-    def __init__(self, pos, dx, dy):
-        super().__init__(stars_group)
-        self.image = random.choice(self.fire)
-        self.rect = self.image.get_rect()
-
-
-        # у каждой частицы своя скорость — это вектор
-        self.velocity = [dx, dy]
-        # и свои координаты
-        self.rect.x, self.rect.y = pos
-        GRAVITY = 0
-        # гравитация будет одинаковой (значение константы)
-        self.gravity = GRAVITY
-
-    def update(self):
-        # применяем гравитационный эффект:
-        # движение с ускорением под действием гравитации
-        self.velocity[1] += self.gravity
-        # перемещаем частицу
-        self.rect.x += self.velocity[0]
-        self.rect.y += self.velocity[1]
-        # убиваем, если частица ушла за экран
-        if not self.rect.colliderect(0, 0, 750, 750):
-            self.kill()
-
-def create_particles(position):
-    # количество создаваемых частиц
-    particle_count = 20
-    # возможные скорости
-    numbers = range(-5, 6)
-    for _ in range(particle_count):
-        Particle(position, random.choice(numbers), random.choice(numbers))
-
-class Board:
+class Board_memo:
     def __init__(self):
         self.width = 4
         self.height = 5
@@ -218,31 +191,33 @@ class Door(pygame.sprite.Sprite):
 
 
 
-def main():
+def start_memo():
+    photo_screen('prememo_pic.jpg')
     start_screen()
     pygame.init()
     running = True
-    board = Board()
+    board = Board_memo()
     for i in range(20):
         Door(door_group)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == 32:  # ПРОБЕЛ
+                    start_life(b, hero)
             door_group.update(event)
         board.render(screen)
-        screen.fill((255, 255, 255))
+        fon = pygame.transform.scale(load_image('fon_for_games.jpg'), (WIDTH, HEIGHT))
+        screen.blit(fon, (0, 0))
         door_group.draw(screen)
         got_group.draw(screen)
-        #stars_group.draw(screen)
-
-        #create_particles((300, 300))
-        stars_group.update()
-        clock.tick(fps)
+        if len(got_group) == 20:
+            print_text(['Кажется, вашей собаки', 'здесь не оказалось!', 'Чтобы продолжить', 'поиски,', 'нажмите пробел'],
+                        font_color=(0, 0, 0), font_size=56, font_type='data/memo_bold.ttf')
         pygame.display.flip()
 
 if __name__ == "__main__":
-    main()
-    stars_group.draw(screen)
-    create_particles((300, 300))
-    stars_group.update()
+    start_memo()
